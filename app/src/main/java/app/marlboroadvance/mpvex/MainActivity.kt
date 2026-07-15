@@ -36,9 +36,11 @@ import app.marlboroadvance.mpvex.preferences.AppearancePreferences
 import app.marlboroadvance.mpvex.preferences.preference.collectAsState
 import app.marlboroadvance.mpvex.presentation.Screen
 import app.marlboroadvance.mpvex.repository.NetworkRepository
+import app.marlboroadvance.mpvex.utils.language.LanguageUtils
 import app.marlboroadvance.mpvex.utils.update.UpdateDialog
 import app.marlboroadvance.mpvex.utils.update.UpdateViewModel
 import app.marlboroadvance.mpvex.ui.browser.MainScreen
+import app.marlboroadvance.mpvex.ui.theme.AppLanguage
 import app.marlboroadvance.mpvex.ui.theme.DarkMode
 import app.marlboroadvance.mpvex.ui.theme.MpvexTheme
 import app.marlboroadvance.mpvex.ui.utils.LocalBackStack
@@ -57,6 +59,8 @@ class MainActivity : ComponentActivity() {
   private val appearancePreferences by inject<AppearancePreferences>()
   private val networkRepository by inject<NetworkRepository>()
   
+  private var currentLanguage: AppLanguage? = null
+  
   // Create a coroutine scope tied to the activity lifecycle
   private val activityScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
 
@@ -68,6 +72,13 @@ class MainActivity : ComponentActivity() {
   }
 
   override fun onCreate(savedInstanceState: Bundle?) {
+    // Apply language before super.onCreate
+    val initialLanguage = runCatching {
+      appearancePreferences.language.get()
+    }.getOrNull() ?: AppLanguage.System
+    LanguageUtils.applyLanguage(this, initialLanguage)
+    currentLanguage = initialLanguage
+
     super.onCreate(savedInstanceState)
     
     PermissionUtils.setMediaAccessLauncher(mediaAccessLauncher)
@@ -86,6 +97,16 @@ class MainActivity : ComponentActivity() {
           darkScrim = Color.Transparent.toArgb(),
         ) { isDarkMode },
       )
+
+      // Listen for language changes
+      val language by appearancePreferences.language.collectAsState()
+      LaunchedEffect(language) {
+        if (language != currentLanguage) {
+          currentLanguage = language
+          LanguageUtils.applyLanguage(this@MainActivity, language)
+          recreate()
+        }
+      }
 
       // Auto-connect to saved network connections
       LaunchedEffect(Unit) {

@@ -270,6 +270,15 @@ enum class DarkMode(
     System(R.string.pref_appearance_darkmode_system),
 }
 
+enum class AppLanguage(
+    @StringRes val titleRes: Int,
+    val code: String?,
+) {
+    System(R.string.language_system, null),
+    English(R.string.language_english, "en"),
+    Chinese(R.string.language_chinese, "zh"),
+}
+
 private const val RIPPLE_DRAGGED_ALPHA = .5f
 private const val RIPPLE_FOCUSED_ALPHA = .6f
 private const val RIPPLE_HOVERED_ALPHA = .4f

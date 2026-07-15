@@ -28,6 +28,7 @@ import app.marlboroadvance.mpvex.preferences.MultiChoiceSegmentedButton
 import app.marlboroadvance.mpvex.preferences.preference.collectAsState
 import app.marlboroadvance.mpvex.presentation.Screen
 import app.marlboroadvance.mpvex.ui.preferences.components.ThemePicker
+import app.marlboroadvance.mpvex.ui.theme.AppLanguage
 import app.marlboroadvance.mpvex.ui.theme.DarkMode
 import app.marlboroadvance.mpvex.ui.utils.LocalBackStack
 import kotlinx.collections.immutable.persistentListOf
@@ -136,6 +137,16 @@ object AppearancePreferencesScreen : Screen {
                                     )
                                 },
                                 enabled = darkMode != DarkMode.Light
+                            )
+
+                            PreferenceDivider()
+
+                            // Language selector
+                            val language by preferences.language.collectAsState()
+                            MultiChoiceSegmentedButton(
+                                choices = AppLanguage.entries.map { stringResource(it.titleRes) }.toImmutableList(),
+                                selectedIndices = persistentListOf(AppLanguage.entries.indexOf(language)),
+                                onClick = { preferences.language.set(AppLanguage.entries[it]) },
                             )
                         }
                     }
